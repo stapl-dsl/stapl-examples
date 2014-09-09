@@ -17,7 +17,7 @@
  *    Technical Contact: maarten.decat@cs.kuleuven.be
  *    Author: maarten.decat@cs.kuleuven.be
  */
-package stapl.core
+package stapl.examples
 
 import stapl.examples.policies.EdocsPolicy
 import org.junit.Before
@@ -29,6 +29,7 @@ import stapl.core.pdp.RequestCtx
 import org.junit.Assert._
 import org.scalatest.junit.AssertionsForJUnit
 import org.joda.time.LocalDateTime
+import stapl.core._
 
 object EdocsPolicyTest {
   
