@@ -17,7 +17,7 @@
  *    Technical Contact: maarten.decat@cs.kuleuven.be
  *    Author: maarten.decat@cs.kuleuven.be
  */
-package stapl.core
+package stapl.examples
 
 import stapl.examples.policies.EhealthPolicy
 import org.junit.Before
@@ -28,6 +28,7 @@ import stapl.core.pdp.AttributeFinder
 import stapl.core.pdp.RequestCtx
 import org.junit.Assert._
 import org.scalatest.junit.AssertionsForJUnit
+import stapl.core._
 
 object BehaviorTest {
   
