@@ -31,6 +31,9 @@ import org.scalatest.junit.AssertionsForJUnit
 import EdocsPolicy.policy
 import EdocsPolicy.resource
 import EdocsPolicy.subject
+import stapl.core.Result
+import stapl.core.Deny
+import stapl.core.Permit
 
 object EdocsPolicyTest {
   

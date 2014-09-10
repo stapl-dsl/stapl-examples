@@ -33,6 +33,11 @@ import EhealthPolicy.environment
 import EhealthPolicy.naturalPolicy
 import EhealthPolicy.resource
 import EhealthPolicy.subject
+import stapl.core.Result
+import stapl.core.NotApplicable
+import stapl.core.Deny
+import stapl.core.Permit
+import stapl.core.log
 
 object EhealthPolicyTest {
   
