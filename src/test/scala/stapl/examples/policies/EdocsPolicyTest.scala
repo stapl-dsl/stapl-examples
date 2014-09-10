@@ -17,18 +17,19 @@
  *    Technical Contact: maarten.decat@cs.kuleuven.be
  *    Author: maarten.decat@cs.kuleuven.be
  */
-package stapl.core
+package stapl.examples.policies
 
-import stapl.examples.policies.EdocsPolicy
+import stapl.core._
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 import stapl.core.pdp.PDP
 import stapl.core.pdp.AttributeFinder
-import stapl.core.pdp.RequestCtx
 import org.junit.Assert._
 import org.scalatest.junit.AssertionsForJUnit
-import org.joda.time.LocalDateTime
+import EdocsPolicy.policy
+import EdocsPolicy.resource
+import EdocsPolicy.subject
 
 object EdocsPolicyTest {
   

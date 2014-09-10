@@ -71,13 +71,12 @@ object EhealthPolicy extends BasicPolicy with GeneralTemplates {
       // Of the physicians, only gps, physicians of the cardiology department, physicians of the elder care department and physicians of the emergency department can access the monitoring system.
       Rule("policy:3") := deny iff !((subject.department === "cardiology") | (subject.department === "elder_care") | (subject.department === "emergency") | ("gp" in subject.roles)),
       
-      // All of the previous physicians can access the monitoring system in case of emergency.
+      // All of the previous physicians except for the GPs can access the monitoring system in case of emergency.
       Rule("policy:4") := when ((subject.department === "cardiology") | (subject.department === "elder_care") | (subject.department === "emergency"))
         permit iff (subject.triggered_breaking_glass | resource.operator_triggered_emergency | resource.indicates_emergency),
       
       // For GPs: only permit if in consultation or treated in the last six months or primary physician or responsible in the system.
-      OnlyPermitIff("policyset:3")(
-          target = "gp" in subject.roles,
+      OnlyPermitIff("policyset:3")("gp" in subject.roles)(
           (resource.owner_id === subject.current_patient_in_consultation)
           | (resource.owner_id in subject.treated_in_last_six_months)
           | (resource.owner_id in subject.primary_patients)
@@ -96,15 +95,13 @@ object EhealthPolicy extends BasicPolicy with GeneralTemplates {
       ),
       
       // For physicians of elder care department: only permit if admitted in care unit or treated in the last six months.
-      OnlyPermitIff("policyset:5")(
-          target = subject.department === "elder_care",
+      OnlyPermitIff("policyset:5")(subject.department === "elder_care")(
           (resource.owner_id in subject.admitted_patients_in_care_unit)
           | (resource.owner_id in subject.treated_in_last_six_months)
       ),
       
       // For physicians of emergency department: only permit if patient status is bad (or the above).
-      OnlyPermitIff("policyset:6")(
-          target = subject.department === "emergency",   
+      OnlyPermitIff("policyset:6")(subject.department === "emergency")(   
           resource.patient_status === "bad"
       )
     ),
@@ -125,8 +122,7 @@ object EhealthPolicy extends BasicPolicy with GeneralTemplates {
       
       // For nurses of cardiology department: they can only view the patient status of a patient 
       // in their nurse unit for whom they are assigned responsible, up to three days after they were discharged.
-      OnlyPermitIff("policyset:8")(
-          target = subject.department === "cardiology",
+      OnlyPermitIff("policyset:8")(subject.department === "cardiology")(
           (resource.owner_id in subject.admitted_patients_in_nurse_unit) 
           	& (!resource.owner_discharged | (environment.currentDateTime lteq (resource.owner_discharged_dateTime + 3.days)))
       ),
@@ -138,8 +134,7 @@ object EhealthPolicy extends BasicPolicy with GeneralTemplates {
         
         // Nurses of the elder care department can only view the patient status of a patient 
         // who is currently admitted to their nurse unit and for whome they are assigned responsible.
-        OnlyPermitIff("policySet:10")(
-            target = AlwaysTrue,
+        OnlyPermitIff("policySet:10")(AlwaysTrue)(
             (resource.owner_id in subject.admitted_patients_in_nurse_unit) 
             	& (resource.owner_id in subject.responsible_patients)
         )
@@ -199,15 +194,14 @@ object EhealthPolicy extends BasicPolicy with GeneralTemplates {
 		        effect = Deny,
 		        condition = !((subject.department === "cardiology") | (subject.department === "elder_care") | (subject.department === "emergency") | ("gp" in subject.roles))),
 		      
-		      // All of the previous physicians can access the monitoring system in case of emergency.
+		      // All of the previous physicians except for the GPs can access the monitoring system in case of emergency.
 		      new Rule("policy:4")(
 		        target = (subject.department === "cardiology") | (subject.department === "elder_care") | (subject.department === "emergency"),
 		        effect = Permit,
 		        condition = (subject.triggered_breaking_glass | resource.operator_triggered_emergency | resource.indicates_emergency)),
 		      
 		      // For GPs: only permit if in consultation or treated in the last six months or primary physician or responsible in the system.
-		      OnlyPermitIff("policyset:3")(
-		          target = "gp" in subject.roles,
+		      OnlyPermitIff("policyset:3")("gp" in subject.roles)(
 		          (resource.owner_id === subject.current_patient_in_consultation)
 		          | (resource.owner_id in subject.treated_in_last_six_months)
 		          | (resource.owner_id in subject.primary_patients)
@@ -234,15 +228,13 @@ object EhealthPolicy extends BasicPolicy with GeneralTemplates {
 		      ),
 		      
 		      // For physicians of elder care department: only permit if admitted in care unit or treated in the last six months.
-		      OnlyPermitIff("policyset:5")(
-		          target = subject.department === "elder_care",
+		      OnlyPermitIff("policyset:5")(subject.department === "elder_care")(
 		          (resource.owner_id in subject.admitted_patients_in_care_unit)
 		          | (resource.owner_id in subject.treated_in_last_six_months)
 		      ),
 		      
 		      // For physicians of emergency department: only permit if patient status is bad (or the above).
-		      OnlyPermitIff("policyset:6")(
-		          target = subject.department === "emergency",   
+		      OnlyPermitIff("policyset:6")(subject.department === "emergency")(   
 		          resource.patient_status === "bad"
 		      )
 		  )
@@ -275,8 +267,7 @@ object EhealthPolicy extends BasicPolicy with GeneralTemplates {
 		      
 		      // For nurses of cardiology department: they can only view the patient status of a patient 
 		      // in their nurse unit for whom they are assigned responsible, up to three days after they were discharged.
-		      OnlyPermitIff("policyset:8")(
-		          target = subject.department === "cardiology",
+		      OnlyPermitIff("policyset:8")(subject.department === "cardiology")(
 		          (resource.owner_id in subject.admitted_patients_in_nurse_unit) 
 		          	& (!resource.owner_discharged | (environment.currentDateTime lteq (resource.owner_discharged_dateTime + 3.days)))
 		      ),
@@ -293,8 +284,7 @@ object EhealthPolicy extends BasicPolicy with GeneralTemplates {
 			        
 			        // Nurses of the elder care department can only view the patient status of a patient 
 			        // who is currently admitted to their nurse unit and for whome they are assigned responsible.
-			        OnlyPermitIff("policySet:10")(
-			            target = AlwaysTrue,
+			        OnlyPermitIff("policySet:10")(AlwaysTrue)(
 			            (resource.owner_id in subject.admitted_patients_in_nurse_unit) 
 			            	& (resource.owner_id in subject.responsible_patients)
 			        )

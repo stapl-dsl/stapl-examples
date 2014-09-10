@@ -5,12 +5,11 @@ import stapl.core.pdp.PDP
 import PolicyFromTheReadMe.policy
 import PolicyFromTheReadMe.resource
 import PolicyFromTheReadMe.subject
-import stapl.templates.general.GeneralTemplates
 
 /**
  * The policy from readme.md
  */
-object PolicyFromTheReadMe extends BasicPolicy with GeneralTemplates {
+object PolicyFromTheReadMe extends BasicPolicy {
  
   subject.roles								= ListAttribute(String)
   subject.treated							= ListAttribute(String)
@@ -23,7 +22,7 @@ object PolicyFromTheReadMe extends BasicPolicy with GeneralTemplates {
 		  & (resource.type_ === "patient-data") 
 		  & ("physician" in subject.roles)) apply PermitOverrides to (
       Rule("requirement-for-permit") := permit iff (resource.owner_id in subject.treated),
-      defaultDeny
+      Rule("default deny") := deny
   )
   
 }

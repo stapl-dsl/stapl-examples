@@ -13,14 +13,14 @@ public class SimpleExample {
 	public static void main(String[] args) {
 		/* Java imitation of the following Scala code:
 		
-		assert(pdp.evaluate("maarten", "view", "doc123",
+		println(pdp.evaluate("subject1", "view", "resource1",
 	        subject.role -> List("helpdesk"),
 	        subject.tenant_name -> List("provider"),
 	        subject.tenant_type -> List("provider"),
 	        subject.assigned_tenants -> List("tenant1","tenant3"),
 	        resource.type_ -> "document",
 	        resource.owning_tenant -> "tenant4",
-	        resource.confidential -> false) === Result(Deny, List()))
+	        resource.confidential -> false))
 		*/
 		
 		Policy policy = EdocsPolicy.policy();
@@ -30,7 +30,7 @@ public class SimpleExample {
 		AttributeContainer env = EdocsPolicy.environment();
 		
 		PDP pdp = new PDP(policy);
-		Result result = pdp.evaluate("maarten", "view", "doc123", 
+		Result result = pdp.evaluate("subject1", "view", "resource1", 
 				list(subject.get("role"), "helpdesk"),
 				list(subject.get("tenant_name"), "provider"),
 				list(subject.get("tenant_type"), "provider"),

@@ -17,18 +17,21 @@
  *    Technical Contact: maarten.decat@cs.kuleuven.be
  *    Author: maarten.decat@cs.kuleuven.be
  */
-package stapl.core
+package stapl.examples.policies
 
-import stapl.examples.policies.EhealthPolicy
+import stapl.core._
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 import stapl.core.pdp.PDP
 import stapl.core.pdp.AttributeFinder
-import stapl.core.pdp.RequestCtx
 import org.junit.Assert._
 import org.scalatest.junit.AssertionsForJUnit
 import org.joda.time.LocalDateTime
+import EhealthPolicy.environment
+import EhealthPolicy.naturalPolicy
+import EhealthPolicy.resource
+import EhealthPolicy.subject
 
 object EhealthPolicyTest {
   
