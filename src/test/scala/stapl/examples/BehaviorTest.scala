@@ -77,34 +77,34 @@ class BehaviorTest extends AssertionsForJUnit {
     }
   }
 
-  @Test def testWrongTypeGiven1() {
-    intercept[StringIndexOutOfBoundsException] {
-      pdp.evaluate("maarten", "view", "doc123",
-        subject.roles -> List(1, 2, 3), // FIXME This should give a type exception, no?
-        subject.triggered_breaking_glass -> false,
-        resource.type_ -> "patientstatus",
-        resource.owner_withdrawn_consents -> List("subject1","subject2","subject3","maarten")) 
-    } 
-  }
-
-  @Test def testWrongTypeGiven2() {
-    intercept[StringIndexOutOfBoundsException] {
-	  pdp.evaluate("maarten", "view", "doc123",
-        subject.roles -> List(1, 2, 3), 
-        subject.triggered_breaking_glass -> "blabla", // FIXME This should give a type exception, no?
-        resource.type_ -> "patientstatus",
-        resource.owner_withdrawn_consents -> List("subject1","subject2","subject3","maarten")) 
-    }
-  }
-
-  @Test def testWrongTypeGiven3() {
-    intercept[StringIndexOutOfBoundsException] {
-	  pdp.evaluate("maarten", "view", "doc123",
-        subject.roles -> "role", // FIXME This should give a type exception, no?
-        subject.triggered_breaking_glass -> false, 
-        resource.type_ -> "patientstatus",
-        resource.owner_withdrawn_consents -> List("subject1","subject2","subject3","maarten")) 
-    }
-  }
+//  @Test def testWrongTypeGiven1() {
+//    intercept[StringIndexOutOfBoundsException] {
+//      pdp.evaluate("maarten", "view", "doc123",
+//        subject.roles -> List(1, 2, 3), // FIXME This should give a type exception, no?
+//        subject.triggered_breaking_glass -> false,
+//        resource.type_ -> "patientstatus",
+//        resource.owner_withdrawn_consents -> List("subject1","subject2","subject3","maarten")) 
+//    } 
+//  }
+//
+//  @Test def testWrongTypeGiven2() {
+//    intercept[StringIndexOutOfBoundsException] {
+//	  pdp.evaluate("maarten", "view", "doc123",
+//        subject.roles -> List(1, 2, 3), 
+//        subject.triggered_breaking_glass -> "blabla", // FIXME This should give a type exception, no?
+//        resource.type_ -> "patientstatus",
+//        resource.owner_withdrawn_consents -> List("subject1","subject2","subject3","maarten")) 
+//    }
+//  }
+//
+//  @Test def testWrongTypeGiven3() {
+//    intercept[StringIndexOutOfBoundsException] {
+//	  pdp.evaluate("maarten", "view", "doc123",
+//        subject.roles -> "role", // FIXME This should give a type exception, no?
+//        subject.triggered_breaking_glass -> false, 
+//        resource.type_ -> "patientstatus",
+//        resource.owner_withdrawn_consents -> List("subject1","subject2","subject3","maarten")) 
+//    }
+//  }
 
 }

@@ -1,134 +1,119 @@
-package stapl.examples.templates
+package stapl.examples.templates.ehealth
 
 import stapl.core._
-import stapl.templates.casestudies.Treating
-import stapl.templates.casestudies.Shifts
-import stapl.templates.general.Location
 import stapl.templates.casestudies.HospitalPolicy
 import stapl.templates.rbac._
 import stapl.templates.htype._
-
+import stapl.examples.templates.ehealth.application.PatientMonitoringSystem
 
 /**
  * This is stapl.core.examples.EhealthPolicy cleaned up with the templates
  */
-object ehealthPolicyWithTemplates extends HospitalPolicy {
-  
-  // For GPs: only permit if in consultation or treated in the last six months or primary physician or responsible in the system.
-  val forGPs = OnlyPermitIff("policyset:3")(subject.hasRole(gp))(
-	(resource.owner_id === subject.current_patient_in_consultation)
-	| (resource.owner_id in subject.treated_in_last_six_months)
-	| (resource.owner_id in subject.primary_patients)
-	| (subject.id in resource.owner_responsible_physicians)
-  )
-  
-  // For cardiologists.
-  val forCardiologists = OnlyPermitIff("policyset:4")(subject.department === cardiology)(        
-	// Permit for head physician.
-	(subject.is_head_physician)
-	// Permit if treated the patient
-	| (resource.owner_id in subject.treated)
-	// Permit if treated in team.
-	| (resource.owner_id in subject.treated_by_team)
-  )
-  
-  // For physicians of elder care department: only permit if admitted in care unit or treated in the last six months.
-  val forElderCare = OnlyPermitIff("policyset:5")(subject.department === elder_care)(
-    (resource.owner_id in subject.admitted_patients_in_care_unit)
-    | (resource.owner_id in subject.treated_in_last_six_months)
-  )
-  
-  // For physicians of emergency department: only permit if patient status is bad (or the above).
-  val forEmergencySpecialists = OnlyPermitIff("policyset:6")(subject.department === emergency)(   
-    resource.patient_status === "bad"
-  )
-  
-  // For physicians.
-  val forPhysicians = Policy("policyset:2") := when (subject.hasRole(physician)) apply FirstApplicable to (      
-	// Of the physicians, only gps, physicians of the cardiology department, physicians of the elder care department and physicians of the emergency department can access the monitoring system.
-	Rule("policy:3") := deny iff !(
-	  (subject.department === cardiology) 
-	  | (subject.department === elder_care) 
-	  | (subject.department === emergency) 
-	  | subject.hasRole(gp)
-	),
-	
-	// All of the previous physicians except for the GPs can access the monitoring system in case of emergency.
-	Rule("policy:4") := when (!(subject.hasRole(gp))) permit iff (
-	  subject.triggered_breaking_glass 
-	  | resource.operator_triggered_emergency 
-	  | resource.indicates_emergency
-	),
-	  
-	forGPs,
-	forCardiologists,
-	forElderCare,
-	forEmergencySpecialists
-  )
-  
-  // For nurses.
-  val forNurses = Policy("policyset:7") := when (subject.hasRole(nurse)) apply FirstApplicable to (      
-    // Of the nurses, only nurses of the cardiology department or the elder care department can access the PMS.
-    Rule("policy:14") := deny iff !((subject.department === cardiology) | (subject.department === elder_care)),
-    
-    // Nurses can only access the PMS during their shifts.
-    Rule("policy:15") := deny iff !(subject.onShift),
-      
-    // Nurses can only access the PMS from the hospital.
-    Rule("policy:16") := deny iff !(subject.location === "hospital"),
-      
-    // Nurses can only view the patient's status of the last five days.
-    Rule("policy:17") := deny iff !(resource.created gteq (environment.currentDateTime - 5.days)),
-      
-    // For nurses of cardiology department: they can only view the patient status of a patient 
-    // in their nurse unit for whom they are assigned responsible, up to three days after they were discharged.
-    OnlyPermitIff("cardiology-nurses")(subject.department === cardiology)( 
-      (resource.owner_id in subject.admitted_patients_in_nurse_unit) 
-      & (!resource.owner_discharged | (resource.owner_discharged_dateTime gteq (environment.currentDateTime + 3.days)))
-    ),
-        
-    // For nurses of the elder care department.
-    Policy("policyset:9") := when (subject.department === elder_care) apply DenyOverrides to (
-      // Of the nurses of the elder care department, only nurses who have been allowed to use the PMS can access the PMS.
-      Rule("policy:20") := deny iff !subject.allowed_to_access_pms,
-       
-      // Nurses of the elder care department can only view the patient status of a patient 
-      // who is currently admitted to their nurse unit and for whome they are assigned responsible.
-      OnlyPermitIff(
-        (resource.owner_id in subject.admitted_patients_in_nurse_unit) 
-        & (resource.owner_id in subject.responsible_patients)
-      )
-    )
-  )
-  
-  // For patients
-  val forPatients = OnlyDenyIff("policyset:11")(subject.hasRole(patient))(      
-    // A patient can only access the PMS if (still) allowed by the hospital (e.g., has 
-    // subscribed to the PMS, but is not paying any more).
-	(!subject.allowed_to_access_pms)
-	// A patient can only view his own status.
-	| (!(resource.owner_id === subject.id))
-  )
+object ehealthPolicyWithTemplates extends HospitalPolicy
+						with PatientMonitoringSystem { 
 
   // The policy set for "view patient status".
-  val policy = Policy("ehealth-with-templates") := when (action.id === "view" & resource.hasType(patientStatus)) apply DenyOverrides to (    
+  val policy = Policy("ehealth-with-templates") := when (action.id === action_view & resource.hasType(patientStatus)) apply DenyOverrides to (    
     // The consent policy.
-    denyIfNotConsent,
+    denyIfNotConsent(subject.hasRole(medical_personel)),
     // Only physicians, nurses and patients can access the monitoring system.
     denyIfNotOneOf(nurse, physician, patient),  
     // The policies for the different types of subjects
-    forPhysicians,
-    forNurses,
-    forPatients
+    // For physicians.
+    Policy("policyset:2") := when (subject.hasRole(physician)) apply FirstApplicable to (      
+		// Of the physicians, only gps, physicians of the cardiology department, physicians of the elder care department and physicians of the emergency department can access the monitoring system.
+		Rule("policy:3") := deny iff !(
+		  (subject.department === cardiology) 
+		  | (subject.department === elder_care) 
+		  | (subject.department === emergency) 
+		  | subject.hasRole(gp)
+		),
+	
+		// All of the previous physicians except for the GPs can access the monitoring system in case of emergency.
+		Rule("policy:4") := when (!(subject.hasRole(gp))) permit iff (
+		  subject.triggered_breaking_glass 
+		  | resource.operator_triggered_emergency 
+		  | resource.indicates_emergency
+		),
+		// For GPs: only permit if in consultation or treated in the last six months or primary physician or responsible in the system.
+		OnlyPermitIff("policyset:3")(subject.hasRole(gp))(
+			(resource.owner_id === subject.current_patient_in_consultation)
+			| (resource.owner_id in subject.treated_in_last_six_months)
+			| treatingOwner(subject, resource)
+			| (subject.id in resource.owner_responsible_physicians)
+		),
+		// For cardiologists.
+		OnlyPermitIff("policyset:4")(subject.department === cardiology)(        
+			// Permit for head physician.
+			(subject.is_head_physician)
+			// Permit if treated the patient
+			| (resource.owner_id in subject.treated)
+			// Permit if treated in team.
+			| (resource.owner_id in subject.treated_by_team)
+		),
+		// For physicians of elder care department: only permit if admitted in care unit or treated in the last six months.
+		OnlyPermitIff("policyset:5")(subject.department === elder_care)(
+		    (resource.owner_id in subject.admitted_patients_in_care_unit)
+		    | (resource.owner_id in subject.treated_in_last_six_months)
+		),
+		// For physicians of emergency department: only permit if patient status is bad (or the above).
+		OnlyPermitIff("policyset:6")(subject.department === emergency)(   
+		    resource.patientHasStatusOrWorse(status_bad)
+		)
+    ),    
+	// For nurses.
+	Policy("policyset:7") := when (subject.hasRole(nurse)) apply FirstApplicable to (      
+	    // Of the nurses, only nurses of the cardiology department or the elder care department can access the PMS.
+	    Rule("policy:14") := deny iff !((subject.department === cardiology) | (subject.department === elder_care)),
+	    
+	    // Nurses can only access the PMS during their shifts.
+	    Rule("policy:15") := deny iff !(subject.onShift),
+	      
+	    // Nurses can only access the PMS from the hospital.
+	    Rule("policy:16") := deny iff !(subject.location === "hospital"),
+	      
+	    // Nurses can only view the patient's status of the last five days.
+	    Rule("policy:17") := deny iff !(resource.created gteq (environment.currentDateTime - 5.days)),
+	      
+	    // For nurses of cardiology department: they can only view the patient status of a patient 
+	    // in their nurse unit for whom they are assigned responsible, up to three days after they were discharged.
+	    OnlyPermitIff("cardiology-nurses")(subject.department === cardiology)( 
+	      (resource.owner_id in subject.admitted_patients_in_nurse_unit) 
+	      & (!resource.owner_discharged | (resource.owner_discharged_dateTime gteq (environment.currentDateTime + 3.days)))
+	    ),
+	        
+	    // For nurses of the elder care department.
+	    Policy("policyset:9") := when (subject.department === elder_care) apply DenyOverrides to (
+	      // Of the nurses of the elder care department, only nurses who have been allowed to use the PMS can access the PMS.
+	      Rule("policy:20") := deny iff !subject.allowed_to_access_pms,
+	       
+	      // Nurses of the elder care department can only view the patient status of a patient 
+	      // who is currently admitted to their nurse unit and for whome they are assigned responsible.
+	      OnlyPermitIff(
+	        (resource.owner_id in subject.admitted_patients_in_nurse_unit) 
+	        & (resource.owner_id in subject.responsible_patients)
+	      )
+	    )
+	),  
+    // For patients
+	OnlyDenyIff("policyset:11")(subject.hasRole(patient))(      
+	    // A patient can only access the PMS if (still) allowed by the hospital (e.g., has 
+	    // subscribed to the PMS, but is not paying any more).
+		(!subject.allowed_to_access_pms)
+		// A patient can only view his own status.
+		| (!(resource.owner_id === subject.id))
+	)
   )
 }
 
 object ehealthPolicyWithoutTemplates {
-  val subject = stapl.core.subject
-  val action = stapl.core.action
-  val resource = stapl.core.resource
-  val environment = stapl.core.environment
+  val subject = new SubjectAttributeContainer
+  val resource = new ResourceAttributeContainer
+  val action = new ActionAttributeContainer
+  val environment = new EnvironmentAttributeContainer
+  action.id = SimpleAttribute(String)
   environment.currentDateTime = SimpleAttribute(DateTime)
+  resource.id = SimpleAttribute(String)
   resource.type_ = SimpleAttribute(String)
   resource.owner_withdrawn_consents = ListAttribute(String)
   resource.operator_triggered_emergency = SimpleAttribute(Bool)
@@ -139,6 +124,7 @@ object ehealthPolicyWithoutTemplates {
   resource.owner_discharged_dateTime = SimpleAttribute("owner:discharged_dateTime", DateTime)
   resource.patient_status = SimpleAttribute(String)
   resource.created = SimpleAttribute(DateTime)
+  subject.id = SimpleAttribute(String)
   subject.roles = ListAttribute(String)
   subject.triggered_breaking_glass = SimpleAttribute(Bool)
   subject.department = SimpleAttribute(String)
