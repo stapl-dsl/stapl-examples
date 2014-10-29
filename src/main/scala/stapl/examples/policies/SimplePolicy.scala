@@ -96,14 +96,13 @@ object Example extends App with BasicPolicy with GeneralTemplates {
   // 2. policy specification
   val studentPolicy = 
     new Rule("policy2")(
-        target = "student" in subject.roles,
         effect = Permit,
-        condition = (subject.birthday + 18.years + 1.days) lteq environment.today
+        condition = ("student" in subject.roles) & ((subject.birthday + 18.years + 1.days) lteq environment.today)
     )
   
   def alwaysPermitRole(id: String, role: String) =
     new Rule(id)(
-        target = role in subject.roles,
+        condition = role in subject.roles,
         effect = Permit
     )
   

@@ -54,10 +54,11 @@ object ehealthPolicyWithTemplates extends HospitalPolicy {
 	),
 	
 	// All of the previous physicians except for the GPs can access the monitoring system in case of emergency.
-	Rule("policy:4") := when (!(subject.hasRole(gp))) permit iff (
-	  subject.triggered_breaking_glass 
+	Rule("policy:4") := permit iff (
+	  !(subject.hasRole(gp)) &
+	  (subject.triggered_breaking_glass 
 	  | resource.operator_triggered_emergency 
-	  | resource.indicates_emergency
+	  | resource.indicates_emergency)
 	),
 	  
 	forGPs,
@@ -173,8 +174,8 @@ object ehealthPolicyWithoutTemplates {
       Rule("policy:3") := deny iff !((subject.department === "cardiology") | (subject.department === "elder_care") | (subject.department === "emergency") | ("gp" in subject.roles)),
       
       // All of the previous physicians except for the GPs can access the monitoring system in case of emergency.
-      Rule("policy:4") := when ((subject.department === "cardiology") | (subject.department === "elder_care") | (subject.department === "emergency"))
-        permit iff (subject.triggered_breaking_glass | resource.operator_triggered_emergency | resource.indicates_emergency),
+      Rule("policy:4") := permit iff ((subject.department === "cardiology") | (subject.department === "elder_care") | (subject.department === "emergency")
+                                     & (subject.triggered_breaking_glass | resource.operator_triggered_emergency | resource.indicates_emergency)),
       
       // For GPs: only permit if in consultation or treated in the last six months or primary physician or responsible in the system.
       Policy("policyset:3") := when ("gp" in subject.roles) apply PermitOverrides to (
@@ -188,7 +189,7 @@ object ehealthPolicyWithoutTemplates {
       // For cardiologists.
       Policy("policyset:4") := when (subject.department === "cardiology") apply PermitOverrides to (        
         // Permit for head physician.
-        Rule("policy:7") := when (subject.is_head_physician) permit,
+        Rule("policy:7") := permit iff (subject.is_head_physician),
         
         // Permit if treated the patient or treated in team.
         Rule("policy:8") := permit iff (resource.owner_id in subject.treated) | (resource.owner_id in subject.treated_by_team),

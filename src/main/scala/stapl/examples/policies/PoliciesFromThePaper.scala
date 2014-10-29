@@ -43,20 +43,19 @@ object PoliciesFromThePaper extends BasicPolicy with GeneralTemplates {
 
   val bigExample = Policy("for-viewing") := when(action.id === "view") apply PermitOverrides to (
     // Permit head physicians
-    Rule("head") := when("physician" in subject.roles) permit iff (physician.is_head_physician),
+    Rule("head") := permit iff (("physician" in subject.roles) & physician.is_head_physician),
 
     // For nurses
     Policy("nurses") := when("nurse" in subject.roles) apply PermitOverrides to (
 
       // Permit cardiology nurses who have treated the patient that owns the resource
-      Rule("treated") := when(nurse.department === "cardiology") permit iff (resource.owner_id in nurse.treated),
+      Rule("treated") := permit iff ((nurse.department === "cardiology") & (resource.owner_id in nurse.treated)),
 
       // Nurses can only access the PMS during their shifts.
       Rule("shifts") := deny iff !((environment.currentTime gteq nurse.shift_start) & (environment.currentTime lteq nurse.shift_stop)),
 
       // Patients can only view their own data
-      Rule("patients") := when ("patient" in subject.roles) deny
-        iff (! (subject.id === resource.owner_id)),
+      Rule("patients") := deny iff (("patient" in subject.roles) & !(subject.id === resource.owner_id)),
 
       // Deny otherwise
       Rule("default-deny") := deny
