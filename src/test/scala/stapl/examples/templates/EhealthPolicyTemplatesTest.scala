@@ -34,6 +34,8 @@ import stapl.core.NotApplicable
 import stapl.core.Deny
 import stapl.core.Permit
 import stapl.core.log
+import stapl.examples.templates.ehealth.ehealthPolicyWithoutTemplates
+import stapl.examples.templates.ehealth.ehealthPolicyWithTemplates
 
 class EhealthPolicyTest extends AssertionsForJUnit {
 
