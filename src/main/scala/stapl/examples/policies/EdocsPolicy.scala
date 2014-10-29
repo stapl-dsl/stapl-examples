@@ -45,16 +45,16 @@ object EdocsPolicy extends BasicPolicy with GeneralTemplates {
       Policy("members-of-provider") := when ("provider" in subject.tenant_name) apply FirstApplicable to (
           
           // No member of the Provider can read a document labeled confidential.
-          Rule("confidential") := when (action.id === "view" & resource.type_ === "document") deny iff (resource.confidential),
+          Rule("confidential") := deny iff ((action.id === "view") & (resource.type_ === "document") & resource.confidential),
           
           // For members of the helpdesk
           Policy("helpdesk") := when ("helpdesk" in subject.role) apply FirstApplicable to (
               
               // Members of the helpdesk can view the metadata of every document in the application.
-              Rule("metadata") := when (action.id === "view" & resource.type_ === "document_metadata") permit,
+              Rule("metadata") := permit iff ((action.id === "view") & (resource.type_ === "document_metadata")),
               
               // Members of the helpdesk can only view the contents of document belonging to tenants for which they are assigned responsible.
-              Policy("contents") := when (action.id === "view" & resource.type_ === "document") apply PermitOverrides to (
+              Policy("contents") := when ((action.id === "view") & (resource.type_ === "document")) apply PermitOverrides to (
                   Rule("assigned-tenants") := permit iff (resource.owning_tenant in subject.assigned_tenants),
                   defaultDeny
               ),
@@ -66,7 +66,7 @@ object EdocsPolicy extends BasicPolicy with GeneralTemplates {
           Policy("admins") := when ("admin" in subject.role) apply FirstApplicable to (
               
               // Admins can create new tenants
-              Rule("create-tenant") := when (action.id === "create" & resource.type_ === "tenant") permit,
+              Rule("create-tenant") := permit iff ((action.id === "create") & (resource.type_ === "tenant")),
               
               defaultDeny
           )
@@ -77,12 +77,12 @@ object EdocsPolicy extends BasicPolicy with GeneralTemplates {
           
           // Unregistered Receivers can only view stuff and can only view documents and document metadata.
           Policy("view document") := apply PermitOverrides to ( 
-              Rule("permit view document") := when (action.id === "view" & resource.type_ === "document") permit,              
+              Rule("permit view document") := permit iff ((action.id === "view") & (resource.type_ === "document")),              
               defaultDeny
           ), 
           
           // A Unregistered Receiver can only view documents sent to him/herself.
-          Rule("only sent to him/herself") := when (action.id === "view") deny iff (resource.destination === subject.id),
+          Rule("only sent to him/herself") := deny iff ((action.id === "view") & (resource.destination === subject.id)),
           
           defaultPermit
       ),
@@ -91,7 +91,7 @@ object EdocsPolicy extends BasicPolicy with GeneralTemplates {
       Policy("registered private receivers") := when ("registered_private_receiver" in subject.role) apply PermitOverrides to (
           
           // A Registered Private Receiver can only view documents
-          Rule("only view documents") := deny iff (action.id === "view" & resource.type_ === "document"),
+          Rule("only view documents") := deny iff ((action.id === "view") & (resource.type_ === "document")),
           
           // The three reasons for a permit: own document, delegated document or delegated all documents.
           Policy("view") := when (action.id === "view") apply PermitOverrides to (
@@ -113,7 +113,7 @@ object EdocsPolicy extends BasicPolicy with GeneralTemplates {
       Policy("tenants") := when ("tenant" in subject.tenant_type) apply DenyOverrides to (
           
           // A member of a Tenant can only send a document if the credit of that tenant is sufficient.
-          Rule("credit") := when (action.id === "send" & resource.type_ === "document") deny iff (! subject.tenant_credit_sufficient),
+          Rule("credit") := deny iff ((action.id === "send") & (resource.type_ === "document") & !subject.tenant_credit_sufficient),
           
           // Tenant isolation
           Rule("tenant isolation") := deny iff (! (resource.owning_tenant === subject.tenant))
@@ -130,13 +130,13 @@ object EdocsPolicy extends BasicPolicy with GeneralTemplates {
               Policy("send") := when (action.id === "send") apply DenyOverrides to (
                   
                   // Members of a subtenant can only send documents to customers of that subtenant.
-                  Rule("only to own subtenant") := when ("subtenant" in subject.tenant_type) deny iff (! (resource.owning_tenant in subject.customers_of_direct_tenant)),
+                  Rule("only to own subtenant") := deny iff (("subtenant" in subject.tenant_type) & !(resource.owning_tenant in subject.customers_of_direct_tenant)),
                   
                   // Members of a bank office can only send documents to external customers whose main office is that bank office.
-                  Rule("bank office") := when ("bank_office" in subject.tenant_type) deny iff (! (resource.owning_tenant in subject.customers_of_bank_office)),
+                  Rule("bank office") := deny iff (("bank_office" in subject.tenant_type) & !(resource.owning_tenant in subject.customers_of_bank_office)),
                   
                   // Refinement of the previous rule: Insurance agents of a bank office can only send documents to insurance customers of that bank office.
-                  Rule("insurance agents") := when (("bank_office" in subject.tenant_type) & ("insurance-agent" in subject.role)) deny iff (! (resource.destination_customer_type === "insurance")),
+                  Rule("insurance agents") := deny iff (("bank_office" in subject.tenant_type) & ("insurance-agent" in subject.role) & !(resource.destination_customer_type === "insurance")),
                   
                   defaultPermit
               ),
@@ -148,10 +148,10 @@ object EdocsPolicy extends BasicPolicy with GeneralTemplates {
 	              Rule("only to him/herself") := deny iff (! (resource.destination === subject.id)),
 	              
 	              // A supervisor can read documents sent by its supervisees.
-	              Rule("supervisor") := when ("superviser" in subject.role) permit iff (resource.origin in subject.supervisees),
+	              Rule("supervisor") :=  permit iff (("superviser" in subject.role) & (resource.origin in subject.supervisees)),
 	              
 	              // A project member can read all documents regarding the project.
-	              Rule("project members") := when ("project_member" in subject.role) permit iff (resource.project in subject.projects),
+	              Rule("project members") := permit iff (("project_member" in subject.role) & (resource.project in subject.projects)),
 	              
 	              // Members of the Large Bank Audit department can read any document sent by any member of Large Bank, except for the paychecks and banking notes, or any other document marked in its meta-data to contain personal information of the customer.
 	              Policy("audit") := when ("audit" in subject.role) apply DenyOverrides to (
@@ -286,7 +286,7 @@ object EdocsPolicy extends BasicPolicy with GeneralTemplates {
           ),
           
           // For creating users
-          Policy("creating-users") := when (action.id === "create" & resource.type_ === "user") apply DenyOverrides to (
+          Policy("creating-users") := when ((action.id === "create") & (resource.type_ === "user")) apply DenyOverrides to (
               
               // Only members of the HR department can create users.
               Rule("HR") := deny iff (! (subject.department === "HR")),
@@ -298,7 +298,7 @@ object EdocsPolicy extends BasicPolicy with GeneralTemplates {
           ),
           
           // For creating subtenants
-          Policy("creating-subtenants") := when (action.id === "create" & resource.type_ === "subtenant") apply DenyOverrides to (
+          Policy("creating-subtenants") := when ((action.id === "create") & (resource.type_ === "subtenant")) apply DenyOverrides to (
               
               // Only members of the IT department which are part of senior management can create subtenants.
               Rule("IT") := deny iff (! ((subject.department === "IT") & ("senior" in subject.role))),
@@ -310,7 +310,7 @@ object EdocsPolicy extends BasicPolicy with GeneralTemplates {
           Policy("local-bank-office") := when ("local-bank-office" in subject.tenant_type) apply DenyOverrides to (
               
               // Only the secretary and the office director of a bank office can read documents sent to the bank office.
-              Rule("only") := when ((action.id === "view") & (resource.type_ === "bank_office_communication")) deny iff (
+              Rule("only") := deny iff (((action.id === "view") & (resource.type_ === "bank_office_communication")) &
                   ! ((("secretary" in subject.role) | ("office_director" in subject.role)) & (resource.owning_tenant === subject.tenant))
               ),
               
