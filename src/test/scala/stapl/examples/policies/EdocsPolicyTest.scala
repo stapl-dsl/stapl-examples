@@ -55,29 +55,31 @@ class EdocsPolicyTest extends AssertionsForJUnit {
   }
 
   @Test def testDenyHelpdeskNotAssigned() {
-    assert(pdp.evaluate("maarten", "view", "doc123",
+    val r = pdp.evaluate("maarten", "view", "doc123",
         subject.role -> List("helpdesk"),
         subject.tenant_name -> List("provider"),
         subject.tenant_type -> List("provider"),
         subject.assigned_tenants -> List("tenant1","tenant3"),
         resource.type_ -> "document",
         resource.owning_tenant -> "tenant4",
-        resource.confidential -> false) === Result(Deny, List()))
+        resource.confidential -> false)
+    assert(Result(r.decision, r.obligationActions) === Result(Deny, List()))
   }
 
   @Test def testPermitHelpdeskAssigned() {
-    assert(pdp.evaluate("maarten", "view", "doc123",
+    val r = pdp.evaluate("maarten", "view", "doc123",
         subject.role -> List("helpdesk"),
         subject.tenant_name -> List("provider"),
         subject.tenant_type -> List("provider"),
         subject.assigned_tenants -> List("tenant1","tenant3"),
         resource.type_ -> "document",
         resource.owning_tenant -> "tenant3",
-        resource.confidential -> false) === Result(Permit, List()))
+        resource.confidential -> false)
+    assert(Result(r.decision, r.obligationActions) === Result(Permit, List()))
   }
 
   @Test def testPermitLargeBankCreateSubtenant() {
-    assert(pdp.evaluate("maarten", "create", "subtenantX",
+    val r = pdp.evaluate("maarten", "create", "subtenantX",
         subject.role -> List("senior"),
         subject.department -> "IT",
         subject.tenant -> "large-bank",
@@ -85,11 +87,12 @@ class EdocsPolicyTest extends AssertionsForJUnit {
         subject.tenant_type -> List("tenant"),
         resource.type_ -> "subtenant",
         resource.confidential -> false,
-        resource.owning_tenant -> "large-bank") === Result(Permit, List()))
+        resource.owning_tenant -> "large-bank")
+    assert(Result(r.decision, r.obligationActions) === Result(Permit, List()))
   }
 
   @Test def testDenyLargeBankCreateSubtenantWrongDepartment() {
-    assert(pdp.evaluate("maarten", "create", "subtenantX",
+    val r = pdp.evaluate("maarten", "create", "subtenantX",
         subject.role -> List("senior"),
         subject.department -> "another-department",
         subject.tenant -> "large-bank",
@@ -97,11 +100,12 @@ class EdocsPolicyTest extends AssertionsForJUnit {
         subject.tenant_type -> List("tenant"),
         resource.type_ -> "subtenant",
         resource.confidential -> false,
-        resource.owning_tenant -> "large-bank") === Result(Deny, List()))
+        resource.owning_tenant -> "large-bank")
+    assert(Result(r.decision, r.obligationActions) === Result(Deny, List()))
   }
 
   @Test def testDenyLargeBankCreateSubtenantWrongRole() {
-    assert(pdp.evaluate("maarten", "create", "subtenantX",
+    val r = pdp.evaluate("maarten", "create", "subtenantX",
         subject.role -> List("junior"),
         subject.department -> "another-department",
         subject.tenant -> "large-bank",
@@ -109,6 +113,7 @@ class EdocsPolicyTest extends AssertionsForJUnit {
         subject.tenant_type -> List("tenant"),
         resource.type_ -> "subtenant",
         resource.confidential -> false,
-        resource.owning_tenant -> "large-bank") === Result(Deny, List()))
+        resource.owning_tenant -> "large-bank")
+    assert(Result(r.decision, r.obligationActions) === Result(Deny, List()))
   }
 }
