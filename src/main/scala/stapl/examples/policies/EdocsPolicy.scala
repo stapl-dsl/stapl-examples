@@ -8,6 +8,8 @@ import stapl.templates.general.GeneralTemplates
  */
 object EdocsPolicy extends BasicPolicy with GeneralTemplates {
   
+  import stapl.core.dsl._
+  
   subject.assigned_offices 					= ListAttribute(String)
   subject.assigned_tenants 					= ListAttribute(String)
   subject.customers_of_bank_office 			= ListAttribute(String)

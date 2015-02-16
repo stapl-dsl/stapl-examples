@@ -41,6 +41,8 @@ object BehaviorTest {
  * passing attributes, wrong types etc.
  */
 class BehaviorTest extends AssertionsForJUnit {
+  
+  import stapl.core.dsl._
 
   import EhealthPolicy._
   
