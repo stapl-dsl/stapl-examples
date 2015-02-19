@@ -29,7 +29,9 @@ import stapl.templates.general.GeneralTemplates
  */
 object PoliciesFromThePaper extends BasicPolicy with GeneralTemplates {
   
-  	subject.roles = ListAttribute(String)
+  import stapl.core.dsl._
+  
+	subject.roles = ListAttribute(String)
 	subject.triggered_breaking_glass = SimpleAttribute(Bool)
 	subject.department = SimpleAttribute(String)
 	subject.treated = ListAttribute(String)

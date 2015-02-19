@@ -36,6 +36,7 @@ import stapl.core.Permit
 import stapl.core.log
 import stapl.examples.templates.ehealth.ehealthPolicyWithoutTemplates
 import stapl.examples.templates.ehealth.ehealthPolicyWithTemplates
+import stapl.core.ConcreteLogObligationAction
 
 class EhealthPolicyTest extends AssertionsForJUnit {
 
@@ -113,8 +114,8 @@ class EhealthPolicyTest extends AssertionsForJUnit {
         resource.type_ -> "patientstatus",
         resource.owner_withdrawn_consents -> List("subject1","subject2","subject3")) === 
           Result(Permit,List(
-              log(subject.id + " performed breaking-the-glass procedure"),
-              log("permit because of breaking-the-glass procedure")
+              ConcreteLogObligationAction("maarten performed breaking-the-glass procedure"),
+              ConcreteLogObligationAction("permit because of breaking-the-glass procedure")
           )))
   }
 
@@ -147,8 +148,8 @@ class EhealthPolicyTest extends AssertionsForJUnit {
         resource.type_ -> "patientstatus",
         resource.owner_withdrawn_consents -> List("subject1","subject2","subject3","maarten")) === 
           Result(Permit,List(
-              log(subject.id + " performed breaking-the-glass procedure"), // TODO subject.id should be evaluated to a value
-              log("permit because of breaking-the-glass procedure")
+              ConcreteLogObligationAction("maarten performed breaking-the-glass procedure"),
+              ConcreteLogObligationAction("permit because of breaking-the-glass procedure")
           )))
   }
   

@@ -37,6 +37,8 @@ import stapl.templates.general.GeneralTemplates
  */
 object Example extends App with BasicPolicy with GeneralTemplates {
   
+  import stapl.core.dsl._
+  
   // 1. attribute definitions
   subject.roles = ListAttribute(String)
   subject.birthday = SimpleAttribute(Day)

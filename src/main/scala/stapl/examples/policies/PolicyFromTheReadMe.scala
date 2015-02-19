@@ -10,6 +10,8 @@ import PolicyFromTheReadMe.subject
  * The policy from readme.md
  */
 object PolicyFromTheReadMe extends BasicPolicy {
+  
+  import stapl.core.dsl._
  
   subject.roles								= ListAttribute(String)
   subject.treated							= ListAttribute(String)

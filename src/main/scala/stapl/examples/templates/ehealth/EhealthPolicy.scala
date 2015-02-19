@@ -11,6 +11,8 @@ import stapl.examples.templates.ehealth.application.PatientMonitoringSystem
  */
 object ehealthPolicyWithTemplates extends HospitalPolicy
 						with PatientMonitoringSystem { 
+  
+  import stapl.core.dsl._
 
   // The policy set for "view patient status".
   val policy = Policy("ehealth-with-templates") := when (action.id === action_view & resource.hasType(patientStatus)) apply DenyOverrides to (    
@@ -108,6 +110,9 @@ object ehealthPolicyWithTemplates extends HospitalPolicy
 }
 
 object ehealthPolicyWithoutTemplates {
+  
+  import stapl.core.dsl._
+  
   val subject = stapl.core.subject
   val action = stapl.core.action
   val resource = stapl.core.resource
