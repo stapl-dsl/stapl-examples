@@ -36,7 +36,7 @@ import stapl.core.Result
 import stapl.core.NotApplicable
 import stapl.core.Deny
 import stapl.core.Permit
-import stapl.core.log
+import stapl.core.dsl.log
 import stapl.core.pdp.ObligationService
 import stapl.core.pdp.LogObligationServiceModule
 import stapl.core.ConcreteLogObligationAction

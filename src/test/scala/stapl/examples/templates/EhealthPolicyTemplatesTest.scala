@@ -33,7 +33,7 @@ import stapl.core.Result
 import stapl.core.NotApplicable
 import stapl.core.Deny
 import stapl.core.Permit
-import stapl.core.log
+import stapl.core.dsl.log
 import stapl.examples.templates.ehealth.ehealthPolicyWithoutTemplates
 import stapl.examples.templates.ehealth.ehealthPolicyWithTemplates
 import stapl.core.ConcreteLogObligationAction
