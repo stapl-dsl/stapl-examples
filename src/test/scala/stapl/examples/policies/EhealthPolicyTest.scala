@@ -41,7 +41,7 @@ import stapl.core.dsl.log
 import stapl.core.ConcreteLogObligationAction
 
 object EhealthPolicyTest {
-  
+
   @BeforeClass def setup() {
     // nothing to do
   }
@@ -61,249 +61,278 @@ class EhealthPolicyTest extends AssertionsForJUnit {
   }
 
   @Test def testNotApplicableOtherAction() {
-    val r = pdp.evaluate("maarten", "an-action", "doc123")
-    assert(Result(r.decision, r.obligationActions) === Result(NotApplicable,List()))
+    val Result(decision, obligationActions, employedAttributes) = pdp.evaluate("maarten", "an-action", "doc123")
+    assert(decision === NotApplicable)
+    assert(obligationActions == List())
+    // ignore the employed attributes for now
   }
 
   @Test def testDenyWithdrawnConsents() {
-    val r = pdp.evaluate("maarten", "view", "doc123",
-        subject.roles -> List("medical_personnel"),
-        subject.triggered_breaking_glass -> false,
-        resource.type_ -> "patientstatus",
-        resource.owner_withdrawn_consents -> List("subject1","subject2","subject3","maarten"))
-    assert(Result(r.decision, r.obligationActions) === Result(Deny,List()))
+    val Result(decision, obligationActions, employedAttributes) = pdp.evaluate("maarten", "view", "doc123",
+      subject.roles -> List("medical_personnel"),
+      subject.triggered_breaking_glass -> false,
+      resource.type_ -> "patientstatus",
+      resource.owner_withdrawn_consents -> List("subject1", "subject2", "subject3", "maarten"))
+    assert(decision === Deny)
+    assert(obligationActions == List())
+    // ignore the employed attributes for now
   }
 
   @Test def testDenyIncorrectMedicalPersonnel() {
-    val r = pdp.evaluate("maarten", "view", "doc123",
-        subject.roles -> List("medical_personnel", "role-not-allowed"),
-        subject.triggered_breaking_glass -> false,
-        resource.type_ -> "patientstatus",
-        resource.owner_withdrawn_consents -> List("subject1","subject2","subject3","maarten"))
-    assert(Result(r.decision, r.obligationActions) === Result(Deny,List()))
+    val Result(decision, obligationActions, employedAttributes) = pdp.evaluate("maarten", "view", "doc123",
+      subject.roles -> List("medical_personnel", "role-not-allowed"),
+      subject.triggered_breaking_glass -> false,
+      resource.type_ -> "patientstatus",
+      resource.owner_withdrawn_consents -> List("subject1", "subject2", "subject3", "maarten"))
+    assert(decision === Deny)
+    assert(obligationActions == List())
+    // ignore the employed attributes for now
   }
 
   @Test def testPhysicianDepartment1() {
-    val r = pdp.evaluate("maarten", "view", "doc123",
-        subject.roles -> List("medical_personnel", "physician"),
-        subject.triggered_breaking_glass -> false,
-        subject.department -> "department-not-allowed",
-        resource.type_ -> "patientstatus",
-        resource.owner_withdrawn_consents -> List("subject1","subject2","subject3","maarten"))
-    assert(Result(r.decision, r.obligationActions) === Result(Deny,List()))
+    val Result(decision, obligationActions, employedAttributes) = pdp.evaluate("maarten", "view", "doc123",
+      subject.roles -> List("medical_personnel", "physician"),
+      subject.triggered_breaking_glass -> false,
+      subject.department -> "department-not-allowed",
+      resource.type_ -> "patientstatus",
+      resource.owner_withdrawn_consents -> List("subject1", "subject2", "subject3", "maarten"))
+    assert(decision === Deny)
+    assert(obligationActions == List())
+    // ignore the employed attributes for now
   }
 
   @Test def testPhysicianDepartment2() {
-    val result = pdp.evaluate("maarten", "view", "doc123",
-        subject.roles -> List("medical_personnel", "physician"),
-        subject.triggered_breaking_glass -> true,
-        subject.department -> "cardiology",
-        resource.type_ -> "patientstatus",
-        resource.owner_withdrawn_consents -> List("subject1","subject2","subject3","maarten"))
-    assert(result.decision === Permit) // ignore the obligations
+    val Result(decision, obligationActions, employedAttributes) = pdp.evaluate("maarten", "view", "doc123",
+      subject.roles -> List("medical_personnel", "physician"),
+      subject.triggered_breaking_glass -> true,
+      subject.department -> "cardiology",
+      resource.type_ -> "patientstatus",
+      resource.owner_withdrawn_consents -> List("subject1", "subject2", "subject3", "maarten"))
+    assert(decision === Permit)
+    // ignore the obligation actions and employed attributes for now
   }
 
   @Test def testPhysicianDepartment3() {
-    val result = pdp.evaluate("maarten", "view", "doc123",
-        subject.roles -> List("medical_personnel", "physician"),
-        subject.triggered_breaking_glass -> true,
-        subject.department -> "elder_care",
-        resource.type_ -> "patientstatus",
-        resource.owner_withdrawn_consents -> List("subject1","subject2","subject3","maarten"))
-    assert(result.decision === Permit) // ignore the obligations
+    val Result(decision, obligationActions, employedAttributes) = pdp.evaluate("maarten", "view", "doc123",
+      subject.roles -> List("medical_personnel", "physician"),
+      subject.triggered_breaking_glass -> true,
+      subject.department -> "elder_care",
+      resource.type_ -> "patientstatus",
+      resource.owner_withdrawn_consents -> List("subject1", "subject2", "subject3", "maarten"))
+    assert(decision === Permit)
+    // ignore the obligation actions and employed attributes for now
   }
 
   @Test def testPhysicianDepartment4() {
-    val result = pdp.evaluate("maarten", "view", "doc123",
-        subject.roles -> List("medical_personnel", "physician"),
-        subject.triggered_breaking_glass -> true,
-        subject.department -> "emergency",
-        resource.type_ -> "patientstatus",
-        resource.owner_withdrawn_consents -> List("subject1","subject2","subject3","maarten"))
-    assert(result.decision === Permit) // ignore the obligations
+    val Result(decision, obligationActions, employedAttributes) = pdp.evaluate("maarten", "view", "doc123",
+      subject.roles -> List("medical_personnel", "physician"),
+      subject.triggered_breaking_glass -> true,
+      subject.department -> "emergency",
+      resource.type_ -> "patientstatus",
+      resource.owner_withdrawn_consents -> List("subject1", "subject2", "subject3", "maarten"))
+    assert(decision === Permit)
+    // ignore the obligation actions and employed attributes for now
   }
 
   @Test def testPermitPhysicianEmergency1() {
-    val r = pdp.evaluate("maarten", "view", "doc123",
-        subject.roles -> List("medical_personnel", "physician"),
-        subject.triggered_breaking_glass -> true,
-        subject.department -> "cardiology",
-        resource.type_ -> "patientstatus",
-        resource.owner_withdrawn_consents -> List("subject1","subject2","subject3"))
-    assert(Result(r.decision, r.obligationActions) === 
-          Result(Permit,List(
-              ConcreteLogObligationAction("maarten performed breaking-the-glass procedure"),
-              ConcreteLogObligationAction("permit because of breaking-the-glass procedure")
-          )))
+    val Result(decision, obligationActions, employedAttributes) = pdp.evaluate("maarten", "view", "doc123",
+      subject.roles -> List("medical_personnel", "physician"),
+      subject.triggered_breaking_glass -> true,
+      subject.department -> "cardiology",
+      resource.type_ -> "patientstatus",
+      resource.owner_withdrawn_consents -> List("subject1", "subject2", "subject3"))
+    assert(decision === Permit)
+    assert(obligationActions == List(
+      ConcreteLogObligationAction("maarten performed breaking-the-glass procedure"),
+      ConcreteLogObligationAction("permit because of breaking-the-glass procedure")))
+    // ignore the employed attributes for now
   }
 
-  @Test def testPermitPhysicianEmergency2() {        
-    val r = pdp.evaluate("maarten", "view", "doc123",
-        subject.roles -> List("medical_personnel", "physician"),
-        subject.triggered_breaking_glass -> false,
-        subject.department -> "cardiology",
-        resource.type_ -> "patientstatus",
-        resource.owner_withdrawn_consents -> List("subject1","subject2","subject3"),
-        resource.operator_triggered_emergency -> true)
-    assert(Result(r.decision, r.obligationActions) === Result(Permit,List()))
+  @Test def testPermitPhysicianEmergency2() {
+    val Result(decision, obligationActions, employedAttributes) = pdp.evaluate("maarten", "view", "doc123",
+      subject.roles -> List("medical_personnel", "physician"),
+      subject.triggered_breaking_glass -> false,
+      subject.department -> "cardiology",
+      resource.type_ -> "patientstatus",
+      resource.owner_withdrawn_consents -> List("subject1", "subject2", "subject3"),
+      resource.operator_triggered_emergency -> true)
+     assert(decision === Permit)
+     assert(obligationActions == List())
+     // ignore the employed attributes for now
   }
 
   @Test def testPermitPhysicianEmergency3() {
-    val r = pdp.evaluate("maarten", "view", "doc123",
-        subject.roles -> List("medical_personnel", "physician"),
-        subject.triggered_breaking_glass -> false,
-        subject.department -> "cardiology",
-        resource.type_ -> "patientstatus",
-        resource.owner_withdrawn_consents -> List("subject1","subject2","subject3"),
-        resource.operator_triggered_emergency -> false,
-        resource.indicates_emergency -> true)
-    assert(Result(r.decision, r.obligationActions) === Result(Permit,List()))
+    val Result(decision, obligationActions, employedAttributes) = pdp.evaluate("maarten", "view", "doc123",
+      subject.roles -> List("medical_personnel", "physician"),
+      subject.triggered_breaking_glass -> false,
+      subject.department -> "cardiology",
+      resource.type_ -> "patientstatus",
+      resource.owner_withdrawn_consents -> List("subject1", "subject2", "subject3"),
+      resource.operator_triggered_emergency -> false,
+      resource.indicates_emergency -> true)
+     assert(decision === Permit)
+     assert(obligationActions == List())
+     // ignore the employed attributes for now
   }
 
   @Test def testOverrideWithdrawnConsents {
-    val r = pdp.evaluate("maarten", "view", "doc123",
-        subject.roles -> List("medical_personnel", "physician"),
-        subject.triggered_breaking_glass -> true,
-        subject.department -> "cardiology",
-        resource.type_ -> "patientstatus",
-        resource.owner_withdrawn_consents -> List("subject1","subject2","subject3","maarten"))
-    assert(Result(r.decision, r.obligationActions) === 
-          Result(Permit,List(
-              ConcreteLogObligationAction("maarten performed breaking-the-glass procedure"),
-              ConcreteLogObligationAction("permit because of breaking-the-glass procedure")
-          )))
+    val Result(decision, obligationActions, employedAttributes) = pdp.evaluate("maarten", "view", "doc123",
+      subject.roles -> List("medical_personnel", "physician"),
+      subject.triggered_breaking_glass -> true,
+      subject.department -> "cardiology",
+      resource.type_ -> "patientstatus",
+      resource.owner_withdrawn_consents -> List("subject1", "subject2", "subject3", "maarten"))
+     assert(decision === Permit)
+     assert(obligationActions == List(
+        ConcreteLogObligationAction("maarten performed breaking-the-glass procedure"),
+        ConcreteLogObligationAction("permit because of breaking-the-glass procedure")))
+     // ignore the employed attributes for now
   }
-  
+
   @Test def testPermitNurseOfElderCareDepartment {
-    val r = pdp.evaluate("maarten", "view", "doc123",
-        subject.roles -> List("medical_personnel", "nurse"),
-        subject.triggered_breaking_glass -> false,
-        subject.department -> "elder_care",
-        subject.allowed_to_access_pms -> true,
-        subject.shift_start -> new LocalDateTime(2014, 6, 24, 9, 0, 0),
-        subject.shift_stop -> new LocalDateTime(2014, 6, 24, 17, 0, 0),
-        subject.location -> "hospital",
-        subject.admitted_patients_in_nurse_unit -> List("patientX", "patientY"),
-        subject.responsible_patients -> List("patientX", "patientZ"),
-        resource.owner_id -> "patientX",
-        resource.owner_withdrawn_consents -> List("subject1"),
-        resource.type_ -> "patientstatus",
-        resource.created -> new LocalDateTime(2014, 6, 22, 14, 2, 1), // three days ago
-        environment.currentDateTime -> new LocalDateTime(2014, 6, 24, 14, 2, 1))
-    assert(Result(r.decision, r.obligationActions) === Result(Permit,List()))
+    val Result(decision, obligationActions, employedAttributes) = pdp.evaluate("maarten", "view", "doc123",
+      subject.roles -> List("medical_personnel", "nurse"),
+      subject.triggered_breaking_glass -> false,
+      subject.department -> "elder_care",
+      subject.allowed_to_access_pms -> true,
+      subject.shift_start -> new LocalDateTime(2014, 6, 24, 9, 0, 0),
+      subject.shift_stop -> new LocalDateTime(2014, 6, 24, 17, 0, 0),
+      subject.location -> "hospital",
+      subject.admitted_patients_in_nurse_unit -> List("patientX", "patientY"),
+      subject.responsible_patients -> List("patientX", "patientZ"),
+      resource.owner_id -> "patientX",
+      resource.owner_withdrawn_consents -> List("subject1"),
+      resource.type_ -> "patientstatus",
+      resource.created -> new LocalDateTime(2014, 6, 22, 14, 2, 1), // three days ago
+      environment.currentDateTime -> new LocalDateTime(2014, 6, 24, 14, 2, 1))
+     assert(decision === Permit)
+     assert(obligationActions == List())
+     // ignore the employed attributes for now
   }
-  
+
   @Test def testDenyNurseOfElderCareDepartmentNotAllowed {
-    val r = pdp.evaluate("maarten", "view", "doc123",
-        subject.roles -> List("medical_personnel", "nurse"),
-        subject.triggered_breaking_glass -> false,
-        subject.department -> "elder_care",
-        subject.allowed_to_access_pms -> false, // X
-        subject.shift_start -> new LocalDateTime(2014, 6, 24, 9, 0, 0),
-        subject.shift_stop -> new LocalDateTime(2014, 6, 24, 17, 0, 0),
-        subject.location -> "hospital",
-        subject.admitted_patients_in_nurse_unit -> List("patientX", "patientY"),
-        subject.responsible_patients -> List("patientX", "patientZ"),
-        resource.owner_id -> "patientX",
-        resource.owner_withdrawn_consents -> List("subject1"),
-        resource.type_ -> "patientstatus",
-        resource.created -> new LocalDateTime(2014, 6, 22, 14, 2, 1), // three days ago
-        environment.currentDateTime -> new LocalDateTime(2014, 6, 24, 14, 2, 1))
-    assert(Result(r.decision, r.obligationActions) === Result(Deny,List()))
+    val Result(decision, obligationActions, employedAttributes) = pdp.evaluate("maarten", "view", "doc123",
+      subject.roles -> List("medical_personnel", "nurse"),
+      subject.triggered_breaking_glass -> false,
+      subject.department -> "elder_care",
+      subject.allowed_to_access_pms -> false, // X
+      subject.shift_start -> new LocalDateTime(2014, 6, 24, 9, 0, 0),
+      subject.shift_stop -> new LocalDateTime(2014, 6, 24, 17, 0, 0),
+      subject.location -> "hospital",
+      subject.admitted_patients_in_nurse_unit -> List("patientX", "patientY"),
+      subject.responsible_patients -> List("patientX", "patientZ"),
+      resource.owner_id -> "patientX",
+      resource.owner_withdrawn_consents -> List("subject1"),
+      resource.type_ -> "patientstatus",
+      resource.created -> new LocalDateTime(2014, 6, 22, 14, 2, 1), // three days ago
+      environment.currentDateTime -> new LocalDateTime(2014, 6, 24, 14, 2, 1))
+     assert(decision === Deny)
+     assert(obligationActions == List())
+     // ignore the employed attributes for now
   }
-  
+
   @Test def testDenyNurseOfElderCareDepartmentNotAtHospital {
-    val r = pdp.evaluate("maarten", "view", "doc123",
-        subject.roles -> List("medical_personnel", "nurse"),
-        subject.triggered_breaking_glass -> false,
-        subject.department -> "elder_care",
-        subject.allowed_to_access_pms -> true,
-        subject.shift_start -> new LocalDateTime(2014, 6, 24, 9, 0, 0),
-        subject.shift_stop -> new LocalDateTime(2014, 6, 24, 17, 0, 0),
-        subject.location -> "somewhere-not-the-hospital", // X
-        subject.admitted_patients_in_nurse_unit -> List("patientX", "patientY"),
-        subject.responsible_patients -> List("patientX", "patientZ"),
-        resource.owner_id -> "patientX",
-        resource.owner_withdrawn_consents -> List("subject1"),
-        resource.type_ -> "patientstatus",
-        resource.created -> new LocalDateTime(2014, 6, 22, 14, 2, 1), // three days ago
-        environment.currentDateTime -> new LocalDateTime(2014, 6, 24, 14, 2, 1))
-    assert(Result(r.decision, r.obligationActions) === Result(Deny,List()))
+    val Result(decision, obligationActions, employedAttributes) = pdp.evaluate("maarten", "view", "doc123",
+      subject.roles -> List("medical_personnel", "nurse"),
+      subject.triggered_breaking_glass -> false,
+      subject.department -> "elder_care",
+      subject.allowed_to_access_pms -> true,
+      subject.shift_start -> new LocalDateTime(2014, 6, 24, 9, 0, 0),
+      subject.shift_stop -> new LocalDateTime(2014, 6, 24, 17, 0, 0),
+      subject.location -> "somewhere-not-the-hospital", // X
+      subject.admitted_patients_in_nurse_unit -> List("patientX", "patientY"),
+      subject.responsible_patients -> List("patientX", "patientZ"),
+      resource.owner_id -> "patientX",
+      resource.owner_withdrawn_consents -> List("subject1"),
+      resource.type_ -> "patientstatus",
+      resource.created -> new LocalDateTime(2014, 6, 22, 14, 2, 1), // three days ago
+      environment.currentDateTime -> new LocalDateTime(2014, 6, 24, 14, 2, 1))
+     assert(decision === Deny)
+     assert(obligationActions == List())
+     // ignore the employed attributes for now
   }
-  
+
   @Test def testDenyNurseOfElderCareDepartmentNotInNurseUnit {
-    val r = pdp.evaluate("maarten", "view", "doc123",
-        subject.roles -> List("medical_personnel", "nurse"),
-        subject.triggered_breaking_glass -> false,
-        subject.department -> "elder_care",
-        subject.allowed_to_access_pms -> true,
-        subject.shift_start -> new LocalDateTime(2014, 6, 24, 9, 0, 0),
-        subject.shift_stop -> new LocalDateTime(2014, 6, 24, 17, 0, 0),
-        subject.location -> "hospital",
-        subject.admitted_patients_in_nurse_unit -> List("patientZ", "patientY"), // X 
-        subject.responsible_patients -> List("patientX", "patientZ"),
-        resource.owner_id -> "patientX",
-        resource.owner_withdrawn_consents -> List("subject1"),
-        resource.type_ -> "patientstatus",
-        resource.created -> new LocalDateTime(2014, 6, 22, 14, 2, 1), // three days ago
-        environment.currentDateTime -> new LocalDateTime(2014, 6, 24, 14, 2, 1))
-    assert(Result(r.decision, r.obligationActions) === Result(Deny,List()))
+    val Result(decision, obligationActions, employedAttributes) = pdp.evaluate("maarten", "view", "doc123",
+      subject.roles -> List("medical_personnel", "nurse"),
+      subject.triggered_breaking_glass -> false,
+      subject.department -> "elder_care",
+      subject.allowed_to_access_pms -> true,
+      subject.shift_start -> new LocalDateTime(2014, 6, 24, 9, 0, 0),
+      subject.shift_stop -> new LocalDateTime(2014, 6, 24, 17, 0, 0),
+      subject.location -> "hospital",
+      subject.admitted_patients_in_nurse_unit -> List("patientZ", "patientY"), // X 
+      subject.responsible_patients -> List("patientX", "patientZ"),
+      resource.owner_id -> "patientX",
+      resource.owner_withdrawn_consents -> List("subject1"),
+      resource.type_ -> "patientstatus",
+      resource.created -> new LocalDateTime(2014, 6, 22, 14, 2, 1), // three days ago
+      environment.currentDateTime -> new LocalDateTime(2014, 6, 24, 14, 2, 1))
+     assert(decision === Deny)
+     assert(obligationActions == List())
+     // ignore the employed attributes for now
   }
-  
+
   @Test def testDenyNurseOfElderCareDepartmentNotResponsible {
-    val r = pdp.evaluate("maarten", "view", "doc123",
-        subject.roles -> List("medical_personnel", "nurse"),
-        subject.triggered_breaking_glass -> false,
-        subject.department -> "elder_care",
-        subject.allowed_to_access_pms -> true,
-        subject.shift_start -> new LocalDateTime(2014, 6, 24, 9, 0, 0),
-        subject.shift_stop -> new LocalDateTime(2014, 6, 24, 17, 0, 0),
-        subject.location -> "hospital",
-        subject.admitted_patients_in_nurse_unit -> List("patientX", "patientY"),
-        subject.responsible_patients -> List("patientY", "patientZ"),
-        resource.owner_id -> "patientX",
-        resource.owner_withdrawn_consents -> List("subject1"),
-        resource.type_ -> "patientstatus",
-        resource.created -> new LocalDateTime(2014, 6, 22, 14, 2, 1), // three days ago
-        environment.currentDateTime -> new LocalDateTime(2014, 6, 24, 14, 2, 1))
-    assert(Result(r.decision, r.obligationActions) === Result(Deny,List()))
+    val Result(decision, obligationActions, employedAttributes) = pdp.evaluate("maarten", "view", "doc123",
+      subject.roles -> List("medical_personnel", "nurse"),
+      subject.triggered_breaking_glass -> false,
+      subject.department -> "elder_care",
+      subject.allowed_to_access_pms -> true,
+      subject.shift_start -> new LocalDateTime(2014, 6, 24, 9, 0, 0),
+      subject.shift_stop -> new LocalDateTime(2014, 6, 24, 17, 0, 0),
+      subject.location -> "hospital",
+      subject.admitted_patients_in_nurse_unit -> List("patientX", "patientY"),
+      subject.responsible_patients -> List("patientY", "patientZ"),
+      resource.owner_id -> "patientX",
+      resource.owner_withdrawn_consents -> List("subject1"),
+      resource.type_ -> "patientstatus",
+      resource.created -> new LocalDateTime(2014, 6, 22, 14, 2, 1), // three days ago
+      environment.currentDateTime -> new LocalDateTime(2014, 6, 24, 14, 2, 1))
+     assert(decision === Deny)
+     assert(obligationActions == List())
+     // ignore the employed attributes for now
   }
-  
+
   @Test def testDenyNurseOfElderCareDepartmentNotOwner {
-    val r = pdp.evaluate("maarten", "view", "doc123",
-        subject.roles -> List("medical_personnel", "nurse"),
-        subject.triggered_breaking_glass -> false,
-        subject.department -> "elder_care",
-        subject.allowed_to_access_pms -> true,
-        subject.shift_start -> new LocalDateTime(2014, 6, 24, 9, 0, 0),
-        subject.shift_stop -> new LocalDateTime(2014, 6, 24, 17, 0, 0),
-        subject.location -> "hospital",
-        subject.admitted_patients_in_nurse_unit -> List("patientX", "patientY"),
-        subject.responsible_patients -> List("patientX", "patientZ"),
-        resource.owner_id -> "patientA",
-        resource.owner_withdrawn_consents -> List("subject1"),
-        resource.type_ -> "patientstatus",
-        resource.created -> new LocalDateTime(2014, 6, 22, 14, 2, 1), // three days ago
-        environment.currentDateTime -> new LocalDateTime(2014, 6, 24, 14, 2, 1))
-    assert(Result(r.decision, r.obligationActions) === Result(Deny,List()))
+    val Result(decision, obligationActions, employedAttributes) = pdp.evaluate("maarten", "view", "doc123",
+      subject.roles -> List("medical_personnel", "nurse"),
+      subject.triggered_breaking_glass -> false,
+      subject.department -> "elder_care",
+      subject.allowed_to_access_pms -> true,
+      subject.shift_start -> new LocalDateTime(2014, 6, 24, 9, 0, 0),
+      subject.shift_stop -> new LocalDateTime(2014, 6, 24, 17, 0, 0),
+      subject.location -> "hospital",
+      subject.admitted_patients_in_nurse_unit -> List("patientX", "patientY"),
+      subject.responsible_patients -> List("patientX", "patientZ"),
+      resource.owner_id -> "patientA",
+      resource.owner_withdrawn_consents -> List("subject1"),
+      resource.type_ -> "patientstatus",
+      resource.created -> new LocalDateTime(2014, 6, 22, 14, 2, 1), // three days ago
+      environment.currentDateTime -> new LocalDateTime(2014, 6, 24, 14, 2, 1))
+     assert(decision === Deny)
+     assert(obligationActions == List())
+     // ignore the employed attributes for now
   }
-  
+
   @Test def testDenyNurseOfElderCareDepartmentTooLongAgo {
-    val r = pdp.evaluate("maarten", "view", "doc123",
-        subject.roles -> List("medical_personnel", "nurse"),
-        subject.triggered_breaking_glass -> false,
-        subject.department -> "elder_care",
-        subject.allowed_to_access_pms -> true,
-        subject.shift_start -> new LocalDateTime(2014, 6, 24, 9, 0, 0),
-        subject.shift_stop -> new LocalDateTime(2014, 6, 24, 17, 0, 0),
-        subject.location -> "hospital",
-        subject.admitted_patients_in_nurse_unit -> List("patientX", "patientY"),
-        subject.responsible_patients -> List("patientX", "patientZ"),
-        resource.owner_id -> "patientX",
-        resource.owner_withdrawn_consents -> List("subject1"),
-        resource.type_ -> "patientstatus",
-        resource.created -> new LocalDateTime(2014, 6, 1, 14, 2, 1), // X more than five days ago
-        environment.currentDateTime -> new LocalDateTime(2014, 6, 24, 14, 2, 1))
-    assert(Result(r.decision, r.obligationActions) === Result(Deny,List()))
+    val Result(decision, obligationActions, employedAttributes) = pdp.evaluate("maarten", "view", "doc123",
+      subject.roles -> List("medical_personnel", "nurse"),
+      subject.triggered_breaking_glass -> false,
+      subject.department -> "elder_care",
+      subject.allowed_to_access_pms -> true,
+      subject.shift_start -> new LocalDateTime(2014, 6, 24, 9, 0, 0),
+      subject.shift_stop -> new LocalDateTime(2014, 6, 24, 17, 0, 0),
+      subject.location -> "hospital",
+      subject.admitted_patients_in_nurse_unit -> List("patientX", "patientY"),
+      subject.responsible_patients -> List("patientX", "patientZ"),
+      resource.owner_id -> "patientX",
+      resource.owner_withdrawn_consents -> List("subject1"),
+      resource.type_ -> "patientstatus",
+      resource.created -> new LocalDateTime(2014, 6, 1, 14, 2, 1), // X more than five days ago
+      environment.currentDateTime -> new LocalDateTime(2014, 6, 24, 14, 2, 1))
+     assert(decision === Deny)
+     assert(obligationActions == List())
+     // ignore the employed attributes for now
   }
 }

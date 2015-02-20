@@ -53,19 +53,25 @@ class BehaviorTest extends AssertionsForJUnit {
   }
 
   @Test def testCorrectBehavior() {
-    assert(pdp.evaluate("maarten", "view", "doc123",
+    val Result(decision, obligationActions, employedAttributes) = pdp.evaluate("maarten", "view", "doc123",
         subject.roles -> List("medical_personnel"),
         subject.triggered_breaking_glass -> false,
         resource.type_ -> "patientstatus",
-        resource.owner_withdrawn_consents -> List("subject1","subject2","subject3","maarten")) === Result(Deny,List()))
+        resource.owner_withdrawn_consents -> List("subject1","subject2","subject3","maarten"))
+     assert(decision === Deny)
+     assert(obligationActions == List())
+     // ignore the employed attributes for now
   }
 
   @Test def testVerboseAttributePassing() {
-    assert(pdp.evaluate("maarten", "view", "doc123",
+    val Result(decision, obligationActions, employedAttributes) = pdp.evaluate("maarten", "view", "doc123",
         new ListAttribute(SUBJECT, "roles", String) -> List("medical_personnel"),
         new SimpleAttribute(SUBJECT, "triggered_breaking_glass", Bool) -> false,
         new SimpleAttribute(RESOURCE, "type_", String) -> "patientstatus",
-        new ListAttribute(RESOURCE, "owner_withdrawn_consents", String) -> List("subject1","subject2","subject3","maarten")) === Result(Deny,List()))
+        new ListAttribute(RESOURCE, "owner_withdrawn_consents", String) -> List("subject1","subject2","subject3","maarten"))
+     assert(decision === Deny)
+     assert(obligationActions == List())
+     // ignore the employed attributes for now
   }
   
   @Test def testUndefinedAttribute() {

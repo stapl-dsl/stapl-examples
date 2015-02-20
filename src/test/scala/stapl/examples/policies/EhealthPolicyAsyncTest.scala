@@ -66,9 +66,12 @@ class EhealthPolicyAsyncTest extends AssertionsForJUnit {
     val actionId = "an-action"
     val resourceId = "doc123"
     val extraAttributes = List[(Attribute, ConcreteValue)]()
-    assertEquals(
-      pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*),
-      pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*))
+    val result = pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*)
+    val resultAsync = pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*)
+    assert(resultAsync.decision === result.decision)
+    assert(resultAsync.obligationActions == result.obligationActions)
+    // ignore the employed attributes for now, because of the differences
+    // in the policies (e.g., resource.htype vs resource.type_)
   }
 
   @Test def testDenyWithdrawnConsents() {
@@ -80,9 +83,12 @@ class EhealthPolicyAsyncTest extends AssertionsForJUnit {
       subject.triggered_breaking_glass -> false,
       resource.type_ -> "patientstatus",
       resource.owner_withdrawn_consents -> List("subject1", "subject2", "subject3", "maarten"))
-    assertEquals(
-      pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*),
-      pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*))
+    val result = pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*)
+    val resultAsync = pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*)
+    assert(resultAsync.decision === result.decision)
+    assert(resultAsync.obligationActions == result.obligationActions)
+    // ignore the employed attributes for now, because of the differences
+    // in the policies (e.g., resource.htype vs resource.type_)
   }
 
   @Test def testDenyIncorrectMedicalPersonnel() {
@@ -94,9 +100,12 @@ class EhealthPolicyAsyncTest extends AssertionsForJUnit {
       subject.triggered_breaking_glass -> false,
       resource.type_ -> "patientstatus",
       resource.owner_withdrawn_consents -> List("subject1", "subject2", "subject3", "maarten"))
-    assertEquals(
-      pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*),
-      pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*))
+    val result = pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*)
+    val resultAsync = pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*)
+    assert(resultAsync.decision === result.decision)
+    assert(resultAsync.obligationActions == result.obligationActions)
+    // ignore the employed attributes for now, because of the differences
+    // in the policies (e.g., resource.htype vs resource.type_)
   }
 
   @Test def testPhysicianDepartment1() {
@@ -109,9 +118,12 @@ class EhealthPolicyAsyncTest extends AssertionsForJUnit {
       subject.department -> "department-not-allowed",
       resource.type_ -> "patientstatus",
       resource.owner_withdrawn_consents -> List("subject1", "subject2", "subject3", "maarten"))
-    assertEquals(
-      pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*),
-      pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*))
+    val result = pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*)
+    val resultAsync = pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*)
+    assert(resultAsync.decision === result.decision)
+    assert(resultAsync.obligationActions == result.obligationActions)
+    // ignore the employed attributes for now, because of the differences
+    // in the policies (e.g., resource.htype vs resource.type_)
   }
 
   @Test def testPhysicianDepartment2() {
@@ -124,9 +136,12 @@ class EhealthPolicyAsyncTest extends AssertionsForJUnit {
       subject.department -> "cardiology",
       resource.type_ -> "patientstatus",
       resource.owner_withdrawn_consents -> List("subject1", "subject2", "subject3", "maarten"))
-    assertEquals(
-      pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*),
-      pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*))
+    val result = pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*)
+    val resultAsync = pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*)
+    assert(resultAsync.decision === result.decision)
+    assert(resultAsync.obligationActions == result.obligationActions)
+    // ignore the employed attributes for now, because of the differences
+    // in the policies (e.g., resource.htype vs resource.type_)
   }
 
   @Test def testPhysicianDepartment3() {
@@ -139,9 +154,12 @@ class EhealthPolicyAsyncTest extends AssertionsForJUnit {
       subject.department -> "elder_care",
       resource.type_ -> "patientstatus",
       resource.owner_withdrawn_consents -> List("subject1", "subject2", "subject3", "maarten"))
-    assertEquals(
-      pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*),
-      pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*))
+    val result = pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*)
+    val resultAsync = pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*)
+    assert(resultAsync.decision === result.decision)
+    assert(resultAsync.obligationActions == result.obligationActions)
+    // ignore the employed attributes for now, because of the differences
+    // in the policies (e.g., resource.htype vs resource.type_)
   }
 
   @Test def testPhysicianDepartment4() {
@@ -154,9 +172,12 @@ class EhealthPolicyAsyncTest extends AssertionsForJUnit {
       subject.department -> "emergency",
       resource.type_ -> "patientstatus",
       resource.owner_withdrawn_consents -> List("subject1", "subject2", "subject3", "maarten"))
-    assertEquals(
-      pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*),
-      pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*))
+    val result = pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*)
+    val resultAsync = pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*)
+    assert(resultAsync.decision === result.decision)
+    assert(resultAsync.obligationActions == result.obligationActions)
+    // ignore the employed attributes for now, because of the differences
+    // in the policies (e.g., resource.htype vs resource.type_)
   }
 
   @Test def testPermitPhysicianEmergency1() {
@@ -169,9 +190,12 @@ class EhealthPolicyAsyncTest extends AssertionsForJUnit {
       subject.department -> "cardiology",
       resource.type_ -> "patientstatus",
       resource.owner_withdrawn_consents -> List("subject1", "subject2", "subject3"))
-    assertEquals(
-      pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*),
-      pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*))
+    val result = pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*)
+    val resultAsync = pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*)
+    assert(resultAsync.decision === result.decision)
+    assert(resultAsync.obligationActions == result.obligationActions)
+    // ignore the employed attributes for now, because of the differences
+    // in the policies (e.g., resource.htype vs resource.type_)
   }
 
   @Test def testPermitPhysicianEmergency2() {
@@ -185,9 +209,12 @@ class EhealthPolicyAsyncTest extends AssertionsForJUnit {
       resource.type_ -> "patientstatus",
       resource.owner_withdrawn_consents -> List("subject1", "subject2", "subject3"),
       resource.operator_triggered_emergency -> true)
-    assertEquals(
-      pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*),
-      pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*))
+    val result = pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*)
+    val resultAsync = pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*)
+    assert(resultAsync.decision === result.decision)
+    assert(resultAsync.obligationActions == result.obligationActions)
+    // ignore the employed attributes for now, because of the differences
+    // in the policies (e.g., resource.htype vs resource.type_)
   }
 
   @Test def testPermitPhysicianEmergency3() {
@@ -202,9 +229,12 @@ class EhealthPolicyAsyncTest extends AssertionsForJUnit {
       resource.owner_withdrawn_consents -> List("subject1", "subject2", "subject3"),
       resource.operator_triggered_emergency -> false,
       resource.indicates_emergency -> true)
-    assertEquals(
-      pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*),
-      pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*))
+    val result = pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*)
+    val resultAsync = pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*)
+    assert(resultAsync.decision === result.decision)
+    assert(resultAsync.obligationActions == result.obligationActions)
+    // ignore the employed attributes for now, because of the differences
+    // in the policies (e.g., resource.htype vs resource.type_)
   }
 
   @Test def testOverrideWithdrawnConsents {
@@ -217,9 +247,12 @@ class EhealthPolicyAsyncTest extends AssertionsForJUnit {
       subject.department -> "cardiology",
       resource.type_ -> "patientstatus",
       resource.owner_withdrawn_consents -> List("subject1", "subject2", "subject3", "maarten"))
-    assertEquals(
-      pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*),
-      pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*))
+    val result = pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*)
+    val resultAsync = pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*)
+    assert(resultAsync.decision === result.decision)
+    assert(resultAsync.obligationActions == result.obligationActions)
+    // ignore the employed attributes for now, because of the differences
+    // in the policies (e.g., resource.htype vs resource.type_)
   }
 
   @Test def testPermitNurseOfElderCareDepartment {
@@ -241,9 +274,12 @@ class EhealthPolicyAsyncTest extends AssertionsForJUnit {
       resource.type_ -> "patientstatus",
       resource.created -> new LocalDateTime(2014, 6, 22, 14, 2, 1), // three days ago
       environment.currentDateTime -> new LocalDateTime(2014, 6, 24, 14, 2, 1))
-    assertEquals(
-      pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*),
-      pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*))
+    val result = pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*)
+    val resultAsync = pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*)
+    assert(resultAsync.decision === result.decision)
+    assert(resultAsync.obligationActions == result.obligationActions)
+    // ignore the employed attributes for now, because of the differences
+    // in the policies (e.g., resource.htype vs resource.type_)
   }
 
   @Test def testDenyNurseOfElderCareDepartmentNotAllowed {
@@ -265,9 +301,12 @@ class EhealthPolicyAsyncTest extends AssertionsForJUnit {
       resource.type_ -> "patientstatus",
       resource.created -> new LocalDateTime(2014, 6, 22, 14, 2, 1), // three days ago
       environment.currentDateTime -> new LocalDateTime(2014, 6, 24, 14, 2, 1))
-    assertEquals(
-      pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*),
-      pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*))
+    val result = pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*)
+    val resultAsync = pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*)
+    assert(resultAsync.decision === result.decision)
+    assert(resultAsync.obligationActions == result.obligationActions)
+    // ignore the employed attributes for now, because of the differences
+    // in the policies (e.g., resource.htype vs resource.type_)
   }
 
   @Test def testDenyNurseOfElderCareDepartmentNotAtHospital {
@@ -289,9 +328,12 @@ class EhealthPolicyAsyncTest extends AssertionsForJUnit {
       resource.type_ -> "patientstatus",
       resource.created -> new LocalDateTime(2014, 6, 22, 14, 2, 1), // three days ago
       environment.currentDateTime -> new LocalDateTime(2014, 6, 24, 14, 2, 1))
-    assertEquals(
-      pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*),
-      pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*))
+    val result = pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*)
+    val resultAsync = pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*)
+    assert(resultAsync.decision === result.decision)
+    assert(resultAsync.obligationActions == result.obligationActions)
+    // ignore the employed attributes for now, because of the differences
+    // in the policies (e.g., resource.htype vs resource.type_)
   }
 
   @Test def testDenyNurseOfElderCareDepartmentNotInNurseUnit {
@@ -313,9 +355,12 @@ class EhealthPolicyAsyncTest extends AssertionsForJUnit {
       resource.type_ -> "patientstatus",
       resource.created -> new LocalDateTime(2014, 6, 22, 14, 2, 1), // three days ago
       environment.currentDateTime -> new LocalDateTime(2014, 6, 24, 14, 2, 1))
-    assertEquals(
-      pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*),
-      pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*))
+    val result = pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*)
+    val resultAsync = pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*)
+    assert(resultAsync.decision === result.decision)
+    assert(resultAsync.obligationActions == result.obligationActions)
+    // ignore the employed attributes for now, because of the differences
+    // in the policies (e.g., resource.htype vs resource.type_)
   }
 
   @Test def testDenyNurseOfElderCareDepartmentNotResponsible {
@@ -337,9 +382,12 @@ class EhealthPolicyAsyncTest extends AssertionsForJUnit {
       resource.type_ -> "patientstatus",
       resource.created -> new LocalDateTime(2014, 6, 22, 14, 2, 1), // three days ago
       environment.currentDateTime -> new LocalDateTime(2014, 6, 24, 14, 2, 1))
-    assertEquals(
-      pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*),
-      pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*))
+    val result = pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*)
+    val resultAsync = pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*)
+    assert(resultAsync.decision === result.decision)
+    assert(resultAsync.obligationActions == result.obligationActions)
+    // ignore the employed attributes for now, because of the differences
+    // in the policies (e.g., resource.htype vs resource.type_)
   }
 
   @Test def testDenyNurseOfElderCareDepartmentNotOwner {
@@ -361,9 +409,12 @@ class EhealthPolicyAsyncTest extends AssertionsForJUnit {
       resource.type_ -> "patientstatus",
       resource.created -> new LocalDateTime(2014, 6, 22, 14, 2, 1), // three days ago
       environment.currentDateTime -> new LocalDateTime(2014, 6, 24, 14, 2, 1))
-    assertEquals(
-      pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*),
-      pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*))
+    val result = pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*)
+    val resultAsync = pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*)
+    assert(resultAsync.decision === result.decision)
+    assert(resultAsync.obligationActions == result.obligationActions)
+    // ignore the employed attributes for now, because of the differences
+    // in the policies (e.g., resource.htype vs resource.type_)
   }
 
   @Test def testDenyNurseOfElderCareDepartmentTooLongAgo {
@@ -385,8 +436,11 @@ class EhealthPolicyAsyncTest extends AssertionsForJUnit {
       resource.type_ -> "patientstatus",
       resource.created -> new LocalDateTime(2014, 6, 1, 14, 2, 1), // X more than five days ago
       environment.currentDateTime -> new LocalDateTime(2014, 6, 24, 14, 2, 1))
-    assertEquals(
-      pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*),
-      pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*))
+    val result = pdp.evaluate(subjectId, actionId, resourceId, extraAttributes: _*)
+    val resultAsync = pdp.evaluateAwaitAsync(subjectId, actionId, resourceId, extraAttributes: _*)
+    assert(resultAsync.decision === result.decision)
+    assert(resultAsync.obligationActions == result.obligationActions)
+    // ignore the employed attributes for now, because of the differences
+    // in the policies (e.g., resource.htype vs resource.type_)
   }
 }
