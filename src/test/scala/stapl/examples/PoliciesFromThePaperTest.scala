@@ -53,10 +53,13 @@ class PoliciesFromThePaperTest extends AssertionsForJUnit {
   }
 
   @Test def testNurse() {
-    assert(pdp.evaluate("maarten", "view", "doc123",
+    val Result(decision, obligationActions, employedAttributes) = pdp.evaluate("maarten", "view", "doc123",
         subject.roles -> List("nurse"),
         subject.department -> "cardiology",
         subject.treated -> List("patient1","patient3"),
-        resource.owner_id -> "patient3") === Result(Permit, List()))
+        resource.owner_id -> "patient3")
+     assert(decision === Permit)
+     assert(obligationActions == List())
+     // ignore the employed attributes for now
   }
 }
